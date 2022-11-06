@@ -12,6 +12,7 @@ export class TodoEditor extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
+
     this.props.onSubmit(this.state.message);
     this.reset();
   };

@@ -7,12 +7,17 @@ import { Dropdown } from "./Dropdown/";
 import { Colorpicker } from "./Colorpicker";
 import { TodoList } from "./TodoList/";
 import { TodoEditor } from "./TodoEditor";
+import { Filter } from "./Filter";
 import { Form } from "./Form";
 export class App extends Component {
   state = {
-    todos: todos,
+    todos: [],
+    filter: "",
   };
 
+  onFilterChange = (event) => {
+    this.setState({ filter: event.currentTarget.value });
+  };
   addTodo = (text) => {
     const todo = {
       id: shortid.generate(),
@@ -48,15 +53,38 @@ export class App extends Component {
   formSubmitHandler = (data) => {
     console.log(data);
   };
+
+  getVisibleTodos = () => {
+    const { filter, todos } = this.state;
+    const normilizedFilter = filter.toLowerCase();
+    return todos.filter((todo) => todo.text.toLowerCase().includes(normilizedFilter));
+  };
+
+  componentDidMount() {
+    const todos = localStorage.getItem("todos");
+    const parsed = JSON.parse(todos);
+    if (parsed) {
+      this.setState({ todos: parsed });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.todos !== prevState.todos) {
+      localStorage.setItem("todos", JSON.stringify(this.state.todos));
+    }
+  }
   render() {
+    const { filter } = this.state;
+    const visibleTodos = this.getVisibleTodos();
     return (
       <>
         {/* <Counter initialValue={10} /> */}
         {/* <Dropdown /> */}
         {/* <Colorpicker /> */}
         <TodoEditor onSubmit={this.addTodo} />
+        <Filter filter={filter} onFilterChange={this.onFilterChange} />
         <TodoList
-          todos={todos}
+          todos={visibleTodos}
           onDeleteTodo={this.deleteTodo}
           onToggleCompleted={this.toggleCompleted}
         />
